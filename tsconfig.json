@@ -10,6 +10,8 @@
 	},
 	"files": [
 		"index.ts",
+		"getHighestCERNode.ts",
+		"MOSE.ts"
 	],
 	"exclude":[
 		"node_modules"

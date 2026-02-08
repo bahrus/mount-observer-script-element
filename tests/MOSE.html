@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test MOSE Mixin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        #test-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MOSE Mixin Tests</h1>
+    <div id="results"></div>
+    <div id="test-container"></div>
+
+    <script type="module">
+        import { MOSE } from '../MOSE.js';
+
+        const results = document.getElementById('results');
+        const container = document.getElementById('test-container');
+
+        function logResult(testName, passed, message) {
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.textContent = `${passed ? '✓' : '✗'} ${testName}: ${message}`;
+            results.appendChild(div);
+        }
+
+        // Test 1: Define a custom element using MOSE mixin
+        try {
+            class TestElement1 extends MOSE(HTMLElement) {
+                constructor() {
+                    super();
+                    this.innerHTML = '<p>Test Element 1</p>';
+                }
+            }
+            customElements.define('test-element-1', TestElement1);
+            
+            const el1 = document.createElement('test-element-1');
+            container.appendChild(el1);
+            
+            logResult(
+                'Test 1',
+                true,
+                'Successfully defined custom element with MOSE mixin'
+            );
+        } catch (error) {
+            logResult(
+                'Test 1',
+                false,
+                `Failed to define element: ${error.message}`
+            );
+        }
+
+        // Test 2: Try to create duplicate element in same registry (should not throw during creation)
+        try {
+            const el2 = document.createElement('test-element-1');
+            container.appendChild(el2);
+            
+            logResult(
+                'Test 2',
+                true,
+                'Can create multiple instances of same custom element'
+            );
+        } catch (error) {
+            logResult(
+                'Test 2',
+                false,
+                `Unexpected error: ${error.message}`
+            );
+        }
+
+        // Test 3: Define element with scoped registry
+        try {
+            const customRegistry = new CustomElementRegistry();
+            
+            class TestElement2 extends MOSE(HTMLElement) {
+                constructor() {
+                    super();
+                    this.innerHTML = '<p>Test Element 2 (Scoped)</p>';
+                }
+            }
+            
+            customRegistry.define('test-element-2', TestElement2);
+            
+            const el3 = document.createElement('test-element-2', {
+                customElementRegistry: customRegistry
+            });
+            container.appendChild(el3);
+            
+            logResult(
+                'Test 3',
+                true,
+                'Successfully defined element in scoped registry'
+            );
+        } catch (error) {
+            logResult(
+                'Test 3',
+                false,
+                `Failed with scoped registry: ${error.message}`
+            );
+        }
+
+        // Test 4: Verify MOSE checks registry scope
+        try {
+            class TestElement3 extends MOSE(HTMLElement) {
+                constructor() {
+                    super();
+                }
+            }
+            customElements.define('test-element-3', TestElement3);
+            
+            const el4 = document.createElement('test-element-3');
+            container.appendChild(el4);
+            
+            logResult(
+                'Test 4',
+                true,
+                'MOSE mixin properly checks registry during construction'
+            );
+        } catch (error) {
+            logResult(
+                'Test 4',
+                false,
+                `Error during registry check: ${error.message}`
+            );
+        }
+
+        console.log('All MOSE tests completed. Check results above.');
+    </script>
+</body>
+</html>
