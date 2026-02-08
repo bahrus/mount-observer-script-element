@@ -78,7 +78,7 @@ export function MOSE(Base) {
             if (src) {
                 try {
                     const response = await import(src, { with: { type: 'json' } });
-                    config = response.default;
+                    config = structuredClone(response.default);
                 }
                 catch (error) {
                     console.error(`Failed to load JSON from ${scriptElement.src}:`, error);
