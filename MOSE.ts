@@ -117,7 +117,9 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
                     
                     // Step 3: Import assignGingerly and merge
                     const { assignGingerly } = await import('assign-gingerly/assignGingerly.js');
-                    config = assignGingerly(config, parsedJSON);
+                    config = assignGingerly(config, parsedJSON, {
+                        registry: (<any>scriptElement).customElementRegistry.assignGingerlyRegistry
+                    });
                 } catch (error) {
                     console.error('Failed to parse script innerHTML as JSON:', error);
                     return;
