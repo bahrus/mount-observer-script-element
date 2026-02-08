@@ -136,7 +136,7 @@ export function MOSE(Base) {
             });
             // Mark that we've set up the MountObserver for this element
             highestCERNode[MOUNT_OBSERVER_SETUP] = this.#mountObserver;
-            this.#mountObserver.observe(highestCERNode);
+            await this.#mountObserver.observe(highestCERNode);
         }
         async #processScriptElement(scriptElement, rootNode) {
             let config = {};

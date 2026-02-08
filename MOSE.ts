@@ -171,7 +171,7 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
             // Mark that we've set up the MountObserver for this element
             (highestCERNode as any)[MOUNT_OBSERVER_SETUP] = this.#mountObserver;
 
-            this.#mountObserver.observe(highestCERNode);
+            await this.#mountObserver.observe(highestCERNode);
         }
 
         async #processScriptElement(scriptElement: HTMLScriptElement, rootNode: Node) {
