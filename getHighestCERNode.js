@@ -24,10 +24,9 @@ export function getHighestCERNode(node) {
             continue;
         }
         // If no parent element, check for rootNode (shadow root case)
-        const root = currentNode.getRootNode?.();
+        const root = currentNode.getRootNode();
         if (root && root !== currentNode && root !== document) {
-            // We're in a shadow root, get the host element
-            currentNode = root.host;
+            return root;
         }
         else {
             // Reached the top
