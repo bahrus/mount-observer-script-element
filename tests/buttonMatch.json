@@ -1,0 +1,12 @@
+{
+   "whereElementMatches": "button",
+   "assignGingerly": {
+      "disabled": false,
+      "?.dataset?.action": "submit",
+      "?.dataset?.trackingId": "12345",
+      "?.style": {
+         "color": "green",
+         "height": "25px"
+      }
+   }
+}

@@ -20,21 +20,22 @@ export function MOSE(Base) {
         }
         #checkForDuplicateRegistration() {
             // Get the tag name of this element
-            const tagName = this.tagName.toLowerCase();
+            // const tagName = this.tagName.toLowerCase();
+            const { localName } = this;
             // Find the highest node with the same custom element registry
             const highestCERNode = getHighestCERNode(this);
             if (!highestCERNode) {
                 return;
             }
             // Get the custom element registry for this scope
-            const registry = highestCERNode.customElementRegistry;
-            // If there's no custom registry, use the global one
-            const targetRegistry = registry || customElements;
+            // const registry = (highestCERNode as any).customElementRegistry as CustomElementRegistry | undefined;
+            // // If there's no custom registry, use the global one
+            // const targetRegistry = registry || customElements;
             // Check if an element with this name is already defined in this registry
             try {
-                const existingDefinition = targetRegistry.get(tagName);
-                if (existingDefinition) {
-                    throw new Error(`Custom element "${tagName}" is already defined in this custom element registry scope.`);
+                const existingTags = Array.from(highestCERNode.querySelectorAll(localName)).filter(x => x !== this);
+                if (existingTags.length > 0) {
+                    throw new Error(`Custom element "${localName}" is already defined in this custom element registry scope.`);
                 }
             }
             catch (error) {
@@ -63,11 +64,11 @@ export function MOSE(Base) {
         async #processScriptElement(scriptElement, rootNode) {
             let config = {};
             // Step 1: Check if script has src attribute and load JSON
-            if (scriptElement.src) {
+            const src = scriptElement.getAttribute('src');
+            if (src) {
                 try {
-                    const response = await fetch(scriptElement.src);
-                    const jsonData = await response.json();
-                    config = jsonData;
+                    const response = await import(src, { with: { type: 'json' } });
+                    config = response.default;
                 }
                 catch (error) {
                     console.error(`Failed to load JSON from ${scriptElement.src}:`, error);
