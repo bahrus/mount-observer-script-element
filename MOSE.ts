@@ -7,6 +7,11 @@ import { MountObserver } from 'mount-observer/MountObserver.js';
 type Constructor<T = HTMLElement> = new (...args: any[]) => T;
 
 /**
+ * Symbol to track if MountObserver has been set up for an element
+ */
+const MOUNT_OBSERVER_SETUP = Symbol.for('cteH9dMG-UWwxVaMwFgvQA');
+
+/**
  * MOSE (Mount Observer Script Element) Mixin
  * 
  * This mixin adds functionality to:
@@ -69,6 +74,14 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
             if (!highestCERNode) {
                 return;
             }
+
+            // Check if MountObserver has already been set up for this element
+            if ((highestCERNode as any)[MOUNT_OBSERVER_SETUP]) {
+                return;
+            }
+
+            // Mark that we've set up the MountObserver for this element
+            (highestCERNode as any)[MOUNT_OBSERVER_SETUP] = true;
 
             // Set up MountObserver to watch for <script type="mountobserver"> elements
             this.#mountObserver = new MountObserver({
