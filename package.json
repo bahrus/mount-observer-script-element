@@ -17,6 +17,10 @@
   "dependencies": {
     "mount-observer": "0.1.2"
   },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "spa-ssi": "0.0.26"
+  },
   "scripts": {
     "serve": "node ./node_modules/spa-ssi/serve.js",
     "test": "playwright test",

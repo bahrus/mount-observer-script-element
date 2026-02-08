@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test getHighestCERNode</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        #test-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>getHighestCERNode Tests</h1>
+    <div id="results"></div>
+    <div id="test-container">
+        <my-element>
+            <template shadowrootmode="open">
+                <div id="shadow-div">
+                    <span id="shadow-span"></span>
+                </div>
+            </template>
+        </my-element>
+    </div>
+
+    <script type="module">
+        import { getHighestCERNode } from '../getHighestCERNode.js';
+
+        const results = document.getElementById('results');
+
+        function logResult(testName, passed, message) {
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.textContent = `${passed ? '✓' : '✗'} ${testName}: ${message}`;
+            results.appendChild(div);
+        }
+
+        // Test 1: Element with default registry
+        const myElement = document.querySelector('my-element');
+        const result1 = getHighestCERNode(myElement);
+        logResult(
+            'Test 1',
+            result1 === myElement,
+            `Element with default registry returns itself`
+        );
+
+        // Test 2: Create element with custom registry in shadow DOM
+        const shadowDiv = myElement.shadowRoot.querySelector('#shadow-div');
+        const customRegistry = new CustomElementRegistry();
+        const section = document.createElement('section', {
+            customElementRegistry: customRegistry
+        });
+        shadowDiv.appendChild(section);
+
+        const nestedDiv = document.createElement('div', {
+            customElementRegistry: customRegistry
+        });
+        section.appendChild(nestedDiv);
+
+        const result2 = getHighestCERNode(nestedDiv);
+        logResult(
+            'Test 2',
+            result2 === section,
+            `Nested element finds highest node with matching custom registry`
+        );
+
+        // Test 3: Element in shadow DOM with same registry as nested child
+        const shadowSpan = myElement.shadowRoot.querySelector('#shadow-span');
+        const result3 = getHighestCERNode(shadowSpan);
+        logResult(
+            'Test 3',
+            result3 !== null,
+            `Element in shadow DOM returns valid node`
+        );
+
+        // Test 4: Multiple levels with same custom registry
+        const div1 = document.createElement('div', {
+            customElementRegistry: customRegistry
+        });
+        const div2 = document.createElement('div', {
+            customElementRegistry: customRegistry
+        });
+        const div3 = document.createElement('div', {
+            customElementRegistry: customRegistry
+        });
+        
+        div1.appendChild(div2);
+        div2.appendChild(div3);
+        section.appendChild(div1);
+
+        const result4 = getHighestCERNode(div3);
+        logResult(
+            'Test 4',
+            result4 === section,
+            `Multiple nested levels find the highest matching node`
+        );
+
+        console.log('All tests completed. Check results above.');
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scope Custom Element Registry</title>
+</head>
+<body>
+    <my-element>
+        <template shadowrootmode="open">
+            <div>
+            </div>
+        </template>
+    </my-element>
+    <script>
+        const div = document.querySelector('my-element').shadowRoot.querySelector('div');
+        const section = document.createElement('section', {
+            customElementRegistry: new CustomElementRegistry()
+        });
+        div.appendChild(section);
+    </script>
+</body>
+</html>
