@@ -66,6 +66,77 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
                     throw error;
                 }
             }
+
+            // Copy mountobserver script elements from container
+            this.#getContainerMOSEs(highestCERNode);
+        }
+
+        #getContainerMOSEs(highestCERNode: Node) {
+            // Step 1: Don't do anything if highestCERNode is the document root
+            if (highestCERNode === document) {
+                return;
+            }
+
+            // Step 2: Get parent element or host
+            let parentNode: Element | null = null;
+            if (highestCERNode instanceof Element) {
+                parentNode = highestCERNode.parentElement;
+            } else if (highestCERNode instanceof ShadowRoot) {
+                parentNode = highestCERNode.host;
+            }
+
+            if (!parentNode) {
+                return;
+            }
+
+            // Step 3: Find the highestCERNode of the parent
+            const parentHighestCERNode = getHighestCERNode(parentNode);
+
+            // Find parent custom element with same localName
+            if (!parentHighestCERNode || !('querySelector' in parentHighestCERNode)) {
+                return;
+            }
+
+            const parentCE = (parentHighestCERNode as DocumentFragment).querySelector(this.localName);
+            if (!parentCE) {
+                return;
+            }
+
+            // If highestCERNode contains parentCE, exit
+            if ((highestCERNode as DocumentFragment).contains?.(parentCE)) {
+                return;
+            }
+
+            // Clone and append script elements
+            this.#cloneAndAppendScripts(parentCE);
+
+            // Add event listener for future mount events
+            parentCE.addEventListener(mountEventName, (e: Event) => {
+                const mountedElement = (e as MountEvent).mountedElement;
+                if (mountedElement instanceof HTMLScriptElement && mountedElement.type === 'mountobserver') {
+                    this.#cloneAndAppendScripts(parentCE);
+                }
+            });
+        }
+
+        #cloneAndAppendScripts(sourceElement: Element) {
+            const scripts = Array.from(sourceElement.querySelectorAll('script[type="mountobserver"]')) as HTMLScriptElement[];
+            
+            for (const script of scripts) {
+                const src = script.getAttribute('src');
+                
+                // Check if we already have a script with the same src
+                const existingScripts = Array.from(this.querySelectorAll('script[type="mountobserver"]')) as HTMLScriptElement[];
+                const alreadyExists = existingScripts.some(existing => {
+                    const existingSrc = existing.getAttribute('src');
+                    return existingSrc === src;
+                });
+
+                if (!alreadyExists) {
+                    const clonedScript = script.cloneNode(true) as HTMLScriptElement;
+                    this.appendChild(clonedScript);
+                }
+            }
         }
 
         async #setupMountObserver() {

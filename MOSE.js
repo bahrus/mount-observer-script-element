@@ -50,6 +50,64 @@ export function MOSE(Base) {
                     throw error;
                 }
             }
+            // Copy mountobserver script elements from container
+            this.#getContainerMOSEs(highestCERNode);
+        }
+        #getContainerMOSEs(highestCERNode) {
+            // Step 1: Don't do anything if highestCERNode is the document root
+            if (highestCERNode === document) {
+                return;
+            }
+            // Step 2: Get parent element or host
+            let parentNode = null;
+            if (highestCERNode instanceof Element) {
+                parentNode = highestCERNode.parentElement;
+            }
+            else if (highestCERNode instanceof ShadowRoot) {
+                parentNode = highestCERNode.host;
+            }
+            if (!parentNode) {
+                return;
+            }
+            // Step 3: Find the highestCERNode of the parent
+            const parentHighestCERNode = getHighestCERNode(parentNode);
+            // Find parent custom element with same localName
+            if (!parentHighestCERNode || !('querySelector' in parentHighestCERNode)) {
+                return;
+            }
+            const parentCE = parentHighestCERNode.querySelector(this.localName);
+            if (!parentCE) {
+                return;
+            }
+            // If highestCERNode contains parentCE, exit
+            if (highestCERNode.contains?.(parentCE)) {
+                return;
+            }
+            // Clone and append script elements
+            this.#cloneAndAppendScripts(parentCE);
+            // Add event listener for future mount events
+            parentCE.addEventListener(mountEventName, (e) => {
+                const mountedElement = e.mountedElement;
+                if (mountedElement instanceof HTMLScriptElement && mountedElement.type === 'mountobserver') {
+                    this.#cloneAndAppendScripts(parentCE);
+                }
+            });
+        }
+        #cloneAndAppendScripts(sourceElement) {
+            const scripts = Array.from(sourceElement.querySelectorAll('script[type="mountobserver"]'));
+            for (const script of scripts) {
+                const src = script.getAttribute('src');
+                // Check if we already have a script with the same src
+                const existingScripts = Array.from(this.querySelectorAll('script[type="mountobserver"]'));
+                const alreadyExists = existingScripts.some(existing => {
+                    const existingSrc = existing.getAttribute('src');
+                    return existingSrc === src;
+                });
+                if (!alreadyExists) {
+                    const clonedScript = script.cloneNode(true);
+                    this.appendChild(clonedScript);
+                }
+            }
         }
         async #setupMountObserver() {
             // Find the highest node with the same custom element registry
