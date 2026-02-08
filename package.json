@@ -1,7 +1,7 @@
 {
   "name": "mount-observer-script-element",
   "version": "0.0.0",
-  "description": "",
+  "description": "A TypeScript mixin that enables declarative configuration of MountObserver instances through script elements with support for Scoped Custom Element Registries",
   "homepage": "https://github.com/bahrus/mount-observer-script-element#readme",
   "bugs": {
     "url": "https://github.com/bahrus/mount-observer-script-element/issues"
@@ -14,6 +14,25 @@
   "author": "Bruce B. Anderson <anderson.bruce.b@gmail.com>",
   "type": "module",
   "main": "index.js",
+  "types": "index.ts",
+  "exports": {
+    ".": {
+      "types": "./index.ts",
+      "default": "./index.js"
+    },
+    "./MOSE.js": {
+      "types": "./MOSE.ts",
+      "default": "./MOSE.js"
+    },
+    "./getHighestCERNode.js": {
+      "types": "./getHighestCERNode.ts",
+      "default": "./getHighestCERNode.js"
+    },
+    "./index.js": {
+      "types": "./index.ts",
+      "default": "./index.js"
+    }
+  },
   "dependencies": {
     "mount-observer": "0.1.4",
     "assign-gingerly": "0.0.6"
