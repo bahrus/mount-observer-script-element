@@ -1,5 +1,6 @@
 import { getHighestCERNode } from './getHighestCERNode.js';
 import { MountObserver } from 'mount-observer/MountObserver.js';
+import { mountEventName } from 'mount-observer/Events.js';
 /**
  * Symbol to track if MountObserver has been set up for an element
  */
@@ -57,11 +58,17 @@ export function MOSE(Base) {
                 return;
             }
             // Check if MountObserver has already been set up for this element
-            if (highestCERNode[MOUNT_OBSERVER_SETUP]) {
+            const existingObserver = highestCERNode[MOUNT_OBSERVER_SETUP];
+            if (existingObserver) {
+                // Subscribe to the existing observer's mount event and re-dispatch from this element
+                existingObserver.addEventListener(mountEventName, (e) => {
+                    const { mountedElement } = e;
+                    if (this.contains(mountedElement)) {
+                        this.dispatchEvent(e);
+                    }
+                });
                 return;
             }
-            // Mark that we've set up the MountObserver for this element
-            highestCERNode[MOUNT_OBSERVER_SETUP] = true;
             // Set up MountObserver to watch for <script type="mountobserver"> elements
             this.#mountObserver = new MountObserver({
                 whereElementMatches: 'script[type="mountobserver"]',
@@ -69,6 +76,8 @@ export function MOSE(Base) {
                     await this.#processScriptElement(scriptElement, highestCERNode);
                 }
             });
+            // Mark that we've set up the MountObserver for this element
+            highestCERNode[MOUNT_OBSERVER_SETUP] = this.#mountObserver;
             this.#mountObserver.observe(highestCERNode);
         }
         async #processScriptElement(scriptElement, rootNode) {
