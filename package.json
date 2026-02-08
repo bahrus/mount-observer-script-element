@@ -14,7 +14,13 @@
   "author": "Bruce B. Anderson <anderson.bruce.b@gmail.com>",
   "type": "module",
   "main": "index.js",
+  "dependencies": {
+    "mount-observer": "0.1.2"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "node ./node_modules/spa-ssi/serve.js",
+    "test": "playwright test",
+    "safari": "npx playwright wk http://localhost:8000",
+    "update": "ncu -u && npm install"
   }
 }

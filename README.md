@@ -12,14 +12,7 @@ This polyfill is awaiting implementation of scoped custom element registry befor
 Following an approach similar to the [speculation api](https://developer.chrome.com/blog/speculation-rules-improvements), we can add a script element anywhere in the DOM:
 
 ```html
-<script type="mountobserver" onload="{...}"  onmount="{
-   const {matchingElement} = event;
-   const {localName} = matchingElement;
-   if(!customElements.get(localName)) {
-      customElements.define(localName, modules[1].MyElement);
-   }
-   observer.disconnectedSignal.abort();
-}">
+<script type="mountobserver">
 {
    "select":"my-element",
    "import": [
@@ -30,11 +23,11 @@ Following an approach similar to the [speculation api](https://developer.chrome.
 </script>
 ```
 
-The things that make this API work together, namely the "modules", "observer", and "mountedElements" (an array of an array of weak refs to elements that match all the criteria for the i<sup>th</sup> "on" selector) would be accessible as properties of the script element:
+What this does:
 
-```JavaScript
-const {modules, observer, mountedElements, mountInit} = myMountObserver;
-```
+1.  Finds the root node associated with the CustomElementRegistry of the script element.
+
+Adds a mountObserver
 
 The "scope" of the observer would be the ShadowRoot containing the script element (or the document outside Shadow if placed outside any shadow DOM, like in the head element).
 
