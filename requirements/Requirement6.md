@@ -1,22 +1,23 @@
 # Copy mountobserver script elements from container
 
-Add some code after line 45 of MOSE.ts:
-
-
-
-Create a method:  #getContainerMOSEs.  pass i the highestCENode found at line 41.  
+Add a method `#getContainerMOSEs(highestCERNode: Node)` that is called at the end of `#checkForDuplicateRegistration()`.
 
 What this method does:
 
-1. if(highestCERNode) is the document root, don't do anything (return).  Otherwise:  
-2.  If highestCERNode is an element, get the parentElement.  If it is a shadowRoot, get the "host" property of the shadowRoot.
-3.  Find the highestCERNode of the element obtained from step 1.
+1. If highestCERNode is the document root, return early (don't do anything)
+2. Get the parent node:
+   - If highestCERNode is an Element, get its parentElement
+   - If highestCERNode is a ShadowRoot, get its host property
+3. Find the highestCERNode of the parent node obtained from step 2
+4. If the parent's highestCERNode exists and has a querySelector method, search for an element with the same localName as the current element instance. Call it "parentCE". If not found, exit.
+5. If the highestCERNode passed into the method contains the parentCE, exit quietly
+6. Call `#cloneAndAppendScripts(parentCE)` to clone all script elements with type="mountobserver" from parentCE
+7. Add an event listener to parentCE for the "mount" event (using mountEventName). When a mount event occurs, check if the mountedElement is an HTMLScriptElement with type="mountobserver", and if so, call `#cloneAndAppendScripts(parentCE)` again
 
-If the Node found in step 2 exists and has method querySelector, do a querySelector for the localName of the current element instance.  If not found, exit.  Call it "parentCE".
+Create a helper method `#cloneAndAppendScripts(sourceElement: Element)`:
 
-If the highestCERNode found at line 41, the one that is passed in to the method, contains the "parentCE", just exit the method quietly.
-
-Clone all the script element children of parentCE have type="mountobserver" and append as children of the current instance unless a script element child with type="mountobserver" already exists with the same attribute value of "src".
-
-Add an event listener to the parentCE for event type "mount", and get the mountedElement from the event, and do the same clone, append, subject to the same condition (maybe create a shareable private method for checking that condition)
+1. Find all script elements with type="mountobserver" in the sourceElement
+2. For each script, get its src attribute
+3. Check if a script with the same src attribute already exists in the current element
+4. Only clone and append scripts that don't already exist (to avoid duplicates)
 
