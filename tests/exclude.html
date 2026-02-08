@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exclude</title>
+    <!-- #include virtual="/imports.html" -->
+</head>
+<body>
+    <button>I am here</button>
+
+    <script type=module>
+        import { MOSE } from '../MOSE.js';
+        class MoseElement extends MOSE(HTMLElement){
+
+        }
+        customElements.define('mose-element', MoseElement);
+    </script>
+    <mose-element>
+        <script type=mountobserver src="mount-observer-script-element/tests/buttonMatch.json">
+        {
+            "?.assignOnMount?.style?.color": "red"
+        }
+    </script>
+    </mose-element>
+    <my-child-element>
+        <template shadowrootmode=open>
+            <button>You are here</button>
+            <mose-element exclude="[src='mount-observer-script-element/tests/buttonMatch.json']" id=child></mose-element>
+        </template>
+    </my-child-element>
+</body>
+</html>
