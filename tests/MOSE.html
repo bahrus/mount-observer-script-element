@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test MOSE Mixin</title>
+    <!-- #include virtual="/imports.html" -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -120,7 +121,7 @@
             );
         }
 
-        // Test 4: Verify MOSE checks registry scope
+        // Test 4: Test MountObserver script element processing
         try {
             class TestElement3 extends MOSE(HTMLElement) {
                 constructor() {
@@ -132,20 +133,41 @@
             const el4 = document.createElement('test-element-3');
             container.appendChild(el4);
             
-            logResult(
-                'Test 4',
-                true,
-                'MOSE mixin properly checks registry during construction'
-            );
+            // Add a mount observer script element
+            const script = document.createElement('script');
+            script.type = 'mountobserver';
+            script.textContent = JSON.stringify({
+                whereElementMatches: 'div.test-target',
+                assignGingerly: {
+                    '?.dataset?.processed': 'true'
+                }
+            });
+            el4.appendChild(script);
+            
+            // Add a target element
+            setTimeout(() => {
+                const targetDiv = document.createElement('div');
+                targetDiv.className = 'test-target';
+                el4.appendChild(targetDiv);
+                
+                setTimeout(() => {
+                    const processed = targetDiv.dataset.processed === 'true';
+                    logResult(
+                        'Test 4',
+                        processed,
+                        processed ? 'MountObserver script element processed successfully' : 'MountObserver script element not processed'
+                    );
+                }, 100);
+            }, 100);
         } catch (error) {
             logResult(
                 'Test 4',
                 false,
-                `Error during registry check: ${error.message}`
+                `Error with MountObserver script: ${error.message}`
             );
         }
 
-        console.log('All MOSE tests completed. Check results above.');
+        console.log('MOSE tests initiated. Check results above.');
     </script>
 </body>
 </html>

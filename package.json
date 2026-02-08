@@ -15,7 +15,8 @@
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "mount-observer": "0.1.2"
+    "mount-observer": "0.1.2",
+    "assign-gingerly": "0.0.6"
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",

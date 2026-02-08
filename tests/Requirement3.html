@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Requirement 3 - MountObserver Script Elements</title>
+    <!-- #include virtual="/imports.html" -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        #test-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Requirement 3: MountObserver Script Elements</h1>
+    <div id="results"></div>
+    <div id="test-container"></div>
+
+    <script type="module">
+        import { MOSE } from '../MOSE.js';
+
+        const results = document.getElementById('results');
+        const container = document.getElementById('test-container');
+
+        function logResult(testName, passed, message, isInfo = false) {
+            const div = document.createElement('div');
+            div.className = `test-result ${isInfo ? 'info' : (passed ? 'pass' : 'fail')}`;
+            div.textContent = `${isInfo ? 'ℹ' : (passed ? '✓' : '✗')} ${testName}: ${message}`;
+            results.appendChild(div);
+        }
+
+        logResult('Info', true, 'Testing MOSE mixin with MountObserver script elements', true);
+
+        // Test 1: Basic MOSE element with inline JSON config
+        try {
+            class MoseElement1 extends MOSE(HTMLElement) {
+                constructor() {
+                    super();
+                    this.attachShadow({ mode: 'open' });
+                    this.shadowRoot.innerHTML = '<div id="content"></div>';
+                }
+            }
+            customElements.define('mose-element-1', MoseElement1);
+            
+            const el1 = document.createElement('mose-element-1');
+            container.appendChild(el1);
+            
+            // Add a mount observer script with inline JSON
+            const script1 = document.createElement('script');
+            script1.type = 'mountobserver';
+            script1.textContent = JSON.stringify({
+                whereElementMatches: 'button.auto-disable',
+                assignGingerly: {
+                    disabled: true,
+                    '?.dataset?.autoDisabled': 'true'
+                }
+            });
+            el1.shadowRoot.appendChild(script1);
+            
+            // Add target button after a delay
+            setTimeout(() => {
+                const button = document.createElement('button');
+                button.className = 'auto-disable';
+                button.textContent = 'Test Button';
+                el1.shadowRoot.getElementById('content').appendChild(button);
+                
+                setTimeout(() => {
+                    const isDisabled = button.disabled === true;
+                    const hasDataset = button.dataset.autoDisabled === 'true';
+                    logResult(
+                        'Test 1',
+                        isDisabled && hasDataset,
+                        `Inline JSON config ${isDisabled && hasDataset ? 'applied successfully' : 'failed to apply'}`
+                    );
+                }, 150);
+            }, 100);
+        } catch (error) {
+            logResult(
+                'Test 1',
+                false,
+                `Failed: ${error.message}`
+            );
+        }
+
+        // Test 2: Empty config (no src, no innerHTML)
+        try {
+            class MoseElement2 extends MOSE(HTMLElement) {
+                constructor() {
+                    super();
+                }
+            }
+            customElements.define('mose-element-2', MoseElement2);
+            
+            const el2 = document.createElement('mose-element-2');
+            container.appendChild(el2);
+            
+            // Add empty script
+            const script2 = document.createElement('script');
+            script2.type = 'mountobserver';
+            el2.appendChild(script2);
+            
+            setTimeout(() => {
+                logResult(
+                    'Test 2',
+                    true,
+                    'Empty script element handled gracefully'
+                );
+            }, 300);
+        } catch (error) {
+            logResult(
+                'Test 2',
+                false,
+                `Failed: ${error.message}`
+            );
+        }
+
+        // Test 3: Multiple properties with assignGingerly
+        try {
+            class MoseElement3 extends MOSE(HTMLElement) {
+                constructor() {
+                    super();
+                    this.innerHTML = '<div id="target-container"></div>';
+                }
+            }
+            customElements.define('mose-element-3', MoseElement3);
+            
+            const el3 = document.createElement('mose-element-3');
+            container.appendChild(el3);
+            
+            const script3 = document.createElement('script');
+            script3.type = 'mountobserver';
+            script3.textContent = JSON.stringify({
+                whereElementMatches: 'input.styled-input',
+                assignGingerly: {
+                    placeholder: 'Enter text...',
+                    '?.style?.backgroundColor': '#f0f0f0',
+                    '?.style?.padding': '10px',
+                    '?.dataset?.styled': 'true'
+                }
+            });
+            el3.appendChild(script3);
+            
+            setTimeout(() => {
+                const input = document.createElement('input');
+                input.className = 'styled-input';
+                el3.querySelector('#target-container').appendChild(input);
+                
+                setTimeout(() => {
+                    const hasPlaceholder = input.placeholder === 'Enter text...';
+                    const hasBackground = input.style.backgroundColor === 'rgb(240, 240, 240)';
+                    const hasPadding = input.style.padding === '10px';
+                    const hasDataset = input.dataset.styled === 'true';
+                    
+                    const allPassed = hasPlaceholder && hasBackground && hasPadding && hasDataset;
+                    logResult(
+                        'Test 3',
+                        allPassed,
+                        `Multiple properties ${allPassed ? 'applied correctly' : 'not all applied'}`
+                    );
+                }, 150);
+            }, 400);
+        } catch (error) {
+            logResult(
+                'Test 3',
+                false,
+                `Failed: ${error.message}`
+            );
+        }
+
+        // Test 4: Scoped registry with MOSE
+        try {
+            const customRegistry = new CustomElementRegistry();
+            
+            class MoseElement4 extends MOSE(HTMLElement) {
+                constructor() {
+                    super();
+                    this.innerHTML = '<span class="target-span">Target</span>';
+                }
+            }
+            
+            customRegistry.define('mose-element-4', MoseElement4);
+            
+            const el4 = document.createElement('mose-element-4', {
+                customElementRegistry: customRegistry
+            });
+            container.appendChild(el4);
+            
+            const script4 = document.createElement('script');
+            script4.type = 'mountobserver';
+            script4.textContent = JSON.stringify({
+                whereElementMatches: 'span.target-span',
+                assignGingerly: {
+                    '?.dataset?.scopedRegistry': 'true'
+                }
+            });
+            el4.appendChild(script4);
+            
+            setTimeout(() => {
+                const span = el4.querySelector('.target-span');
+                const hasDataset = span?.dataset?.scopedRegistry === 'true';
+                logResult(
+                    'Test 4',
+                    hasDataset,
+                    `Scoped registry ${hasDataset ? 'works correctly' : 'failed'}`
+                );
+            }, 550);
+        } catch (error) {
+            logResult(
+                'Test 4',
+                false,
+                `Failed: ${error.message}`
+            );
+        }
+
+        console.log('Requirement 3 tests initiated. Results will appear above.');
+    </script>
+</body>
+</html>
