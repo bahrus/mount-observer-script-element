@@ -1,6 +1,6 @@
 {
    "whereElementMatches": "button",
-   "assignGingerly": {
+   "assignOnMount": {
       "disabled": false,
       "?.dataset?.action": "submit",
       "?.dataset?.trackingId": "12345",

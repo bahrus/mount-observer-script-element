@@ -36,6 +36,57 @@ Once again, arrays of settings could be supported, which, in practice, would gre
 > [!Note]
 > To support the event handlers above, I believe it would require that CSP solutions factor in both the inner content of the script element as well as all the event handlers via the string concatenation operator.  I actually think such support is quite critical due to lack of support of import.meta.[some reference to the script element] not being available, as it was pre-ES Modules.
 
+## Simpler example
+
+This might be an easier example to consider, and can be tested by opening tests/simple.html.
+
+Simple.html:
+
+```html
+   <button>I am here</button>
+   <script type=mountobserver src="mount-observer-script-element/tests/buttonMatch.json">
+      {
+         "?.assignOnMount?.style?.color": "red"
+      }
+   </script>
+   <script type=module>
+      import { MOSE } from '../MOSE.js';
+      class MoseElement extends MOSE(HTMLElement){
+
+      }
+      customElements.define('mose-element', MoseElement);
+   </script>
+   <mose-element></mose-element>
+```
+
+buttonMatch.json:
+
+```JSON
+{
+   "whereElementMatches": "button",
+   "assignOnMount": {
+      "disabled": false,
+      "?.dataset?.action": "submit",
+      "?.dataset?.trackingId": "12345",
+      "?.style": {
+         "color": "green",
+         "height": "25px"
+      }
+   }
+}
+```
+
+The button gets modified as follows:
+
+```html
+<button 
+   data-action="submit" 
+   data-tracking-id="12345" 
+   style="color: red; height: 25px;">
+      I am here
+</button>
+```
+
 ## Specific solution for lazy loading custom element definitions
 
 Since the example we've been dwelling on so far (lazy custom element definition) seems like such a pressing, common requirement, and was in fact the originating impetus for this proposal, we can go a step further and make the example above 100% declarative, thus resulting in a less clunky interplay between JSON and custom script.  This is meant as a way of illustrating how the platform could continue to extend this proposal going forward.
