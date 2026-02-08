@@ -95,7 +95,13 @@ export function MOSE(Base) {
         }
         #cloneAndAppendScripts(sourceElement) {
             const scripts = Array.from(sourceElement.querySelectorAll('script[type="mountobserver"]'));
+            // Get exclude value from property or attribute
+            const exclude = this.exclude ?? this.getAttribute('exclude');
             for (const script of scripts) {
+                // Check if script matches exclude criteria
+                if (exclude && script.matches(exclude)) {
+                    continue;
+                }
                 const src = script.getAttribute('src');
                 // Check if we already have a script with the same src
                 const existingScripts = Array.from(this.querySelectorAll('script[type="mountobserver"]'));

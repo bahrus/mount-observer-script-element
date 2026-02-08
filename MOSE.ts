@@ -122,7 +122,15 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
         #cloneAndAppendScripts(sourceElement: Element) {
             const scripts = Array.from(sourceElement.querySelectorAll('script[type="mountobserver"]')) as HTMLScriptElement[];
             
+            // Get exclude value from property or attribute
+            const exclude = (this as any).exclude ?? this.getAttribute('exclude');
+            
             for (const script of scripts) {
+                // Check if script matches exclude criteria
+                if (exclude && script.matches(exclude)) {
+                    continue;
+                }
+                
                 const src = script.getAttribute('src');
                 
                 // Check if we already have a script with the same src
