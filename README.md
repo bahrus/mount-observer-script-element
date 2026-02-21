@@ -1,6 +1,6 @@
 # mount-observer-script-element
 
-A TypeScript mixin (MOSE) that enables declarative configuration of [MountObserver](https://www.npmjs.com/package/mount-observer) instances through `<script type="mountobserver">` elements, with support for Chrome's Scoped Custom Element Registries.
+This package provides a TypeScript mixin (MOSE) that enables declarative configuration of [MountObserver](https://www.npmjs.com/package/mount-observer) instances through `<script type="mountobserver">` elements, with support for Chrome's Scoped Custom Element Registries.
 
 ## Overview
 
@@ -36,8 +36,8 @@ customElements.define('my-element', MyElement);
 <my-element>
     <script type="mountobserver">
     {
-        "whereElementMatches": "button",
-        "assignGingerly": {
+        "matching": "button",
+        "assignOnMount": {
             "disabled": false,
             "?.dataset?.action": "submit",
             "?.style?.color": "green"
@@ -58,8 +58,8 @@ Place `<script type="mountobserver">` elements inside your custom element to con
 <my-element>
     <script type="mountobserver">
     {
-        "whereElementMatches": "input",
-        "assignGingerly": {
+        "matching": "input",
+        "assignOnMount": {
             "placeholder": "Enter text...",
             "?.style?.backgroundColor": "#f0f0f0"
         }
@@ -80,12 +80,12 @@ The JSON file will be loaded using JSON import with `import(src, {with: {type: '
 
 ### 3. Merging Configurations
 
-You can combine external and inline configurations. The inline JSON will be merged with the external configuration using [assignGingerly](https://www.npmjs.com/package/assign-gingerly):
+You can combine external and inline configurations. The inline JSON will be merged with the external configuration using [assignOnMount](https://www.npmjs.com/package/assign-gingerly):
 
 ```html
 <script type="mountobserver" src="./base-config.json">
 {
-    "assignGingerly": {
+    "assignOnMount": {
         "?.style?.color": "red"
     }
 }
@@ -197,7 +197,7 @@ Utility function that finds the highest node in the DOM tree that shares the sam
 2. **Script Processing**: When a mountobserver script is found:
    - Loads external JSON if `src` attribute is present
    - Parses inline JSON from `innerHTML`
-   - Merges configurations using assignGingerly
+   - Merges configurations using assignOnMount
    - Creates a MountObserver with the merged configuration
 
 3. **Registry Scoping**: 
@@ -236,8 +236,8 @@ Utility function that finds the highest node in the DOM tree that shares the sam
     <my-element>
         <script type="mountobserver">
         {
-            "whereElementMatches": "button",
-            "assignGingerly": {
+            "matching": "button",
+            "assignOnMount": {
                 "disabled": false,
                 "?.dataset?.action": "submit",
                 "?.style": {
