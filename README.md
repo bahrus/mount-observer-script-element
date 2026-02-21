@@ -80,7 +80,7 @@ The JSON file will be loaded using JSON import with `import(src, {with: {type: '
 
 ### 3. Merging Configurations
 
-You can combine external and inline configurations. The inline JSON will be merged with the external configuration using [assignOnMount](https://www.npmjs.com/package/assign-gingerly):
+You can combine external and inline configurations. The inline JSON will be merged with the external configuration using [assign-gingerly](https://www.npmjs.com/package/assign-gingerly):
 
 ```html
 <script type="mountobserver" src="./base-config.json">
