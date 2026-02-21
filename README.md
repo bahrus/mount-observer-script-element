@@ -169,6 +169,34 @@ myElement.addEventListener('mount', (e) => {
 });
 ```
 
+### 9. Stray Script Element Support
+
+MOSE also processes "stray" mountobserver script elements that are not direct children of a MOSE custom element. This allows you to place script elements anywhere in the DOM, and they will be processed when their parent is a custom element:
+
+```html
+<my-custom-element>
+    <div>
+        <script type="mountobserver">
+        {
+            "matching": "button",
+            "assignOnMount": {
+                "disabled": true
+            }
+        }
+        </script>
+        <button>I will be disabled</button>
+    </div>
+</my-custom-element>
+```
+
+**How it works:**
+- When a mountobserver script is detected that's not contained within a MOSE element
+- The script's parent element is checked to see if it's a custom element (has a hyphen in localName)
+- If so, the script is processed using the parent's registry scope
+- Each script is marked as processed (via `data-mose-processed`) to prevent duplicate processing
+
+This feature enables more flexible placement of configuration scripts throughout your component tree.
+
 ## API
 
 ### MOSE Mixin

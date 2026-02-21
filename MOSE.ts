@@ -161,8 +161,26 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
                 // Subscribe to the existing observer's mount event and re-dispatch from this element
                 existingObserver.addEventListener(mountEventName, (e: MountEvent) => {
                     const {mountedElement} = e;
+                    const mountedScriptElement = mountedElement as HTMLScriptElement;
+                    
+                    // Skip if already processed
+                    if(mountedScriptElement.dataset?.moseProcessed) return;
+                    mountedScriptElement.dataset.moseProcessed = 'true';
+                    
                     if(this.contains(mountedElement)){
                         this.dispatchEvent(e);
+                    } else {
+                        // Handle stray script elements
+                        const {parentElement} = mountedScriptElement;
+                        if(parentElement === null) return;
+                        
+                        const {localName} = parentElement;
+                        if(!localName.includes('-')) return;
+                        
+                        const highestCERNode = getRootRegistryContainer(parentElement);
+                        if(!highestCERNode) return;
+                        
+                        this.#processScriptElement(mountedScriptElement, highestCERNode);
                     }
                 });
                 return;
