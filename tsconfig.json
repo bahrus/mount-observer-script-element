@@ -10,7 +10,6 @@
 	},
 	"files": [
 		"index.ts",
-		"getHighestCERNode.ts",
 		"MOSE.ts"
 	],
 	"exclude":[

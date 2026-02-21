@@ -24,17 +24,13 @@
       "types": "./MOSE.ts",
       "default": "./MOSE.js"
     },
-    "./getHighestCERNode.js": {
-      "types": "./getHighestCERNode.ts",
-      "default": "./getHighestCERNode.js"
-    },
     "./index.js": {
       "types": "./index.ts",
       "default": "./index.js"
     }
   },
   "dependencies": {
-    "mount-observer": "0.1.5",
+    "mount-observer": "0.1.6",
     "assign-gingerly": "0.0.12"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { getHighestCERNode } from './getHighestCERNode.js';
+import { getRootRegistryContainer } from 'mount-observer/getRootRegistryContainer.js';
 import { MountObserver } from 'mount-observer/MountObserver.js';
 import { MountEvent, mountEventName } from 'mount-observer/Events.js'
 
@@ -38,7 +38,7 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
             const {localName} = this;
 
             // Find the highest node with the same custom element registry
-            const highestCERNode = getHighestCERNode(this) as DocumentFragment;
+            const highestCERNode = getRootRegistryContainer(this) as DocumentFragment;
 
             if (!highestCERNode) {
                 return;
@@ -90,7 +90,7 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
             }
 
             // Step 3: Find the highestCERNode of the parent
-            const parentHighestCERNode = getHighestCERNode(parentNode);
+            const parentHighestCERNode = getRootRegistryContainer(parentNode);
 
             // Find parent custom element with same localName
             if (!parentHighestCERNode || !('querySelector' in parentHighestCERNode)) {
@@ -149,7 +149,7 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
 
         async #setupMountObserver() {
             // Find the highest node with the same custom element registry
-            const highestCERNode = getHighestCERNode(this);
+            const highestCERNode = getRootRegistryContainer(this);
 
             if (!highestCERNode) {
                 return;
@@ -170,7 +170,7 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
 
             // Set up MountObserver to watch for <script type="mountobserver"> elements
             this.#mountObserver = new MountObserver({
-                whereElementMatches: 'script[type="mountobserver"]',
+                matching: 'script[type="mountobserver"]',
                 do: async (scriptElement: Element) => {
                     await this.#processScriptElement(scriptElement as HTMLScriptElement, highestCERNode);
                 }

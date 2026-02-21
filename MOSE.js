@@ -1,4 +1,4 @@
-import { getHighestCERNode } from './getHighestCERNode.js';
+import { getRootRegistryContainer } from 'mount-observer/getRootRegistryContainer.js';
 import { MountObserver } from 'mount-observer/MountObserver.js';
 import { mountEventName } from 'mount-observer/Events.js';
 /**
@@ -28,7 +28,7 @@ export function MOSE(Base) {
             // const tagName = this.tagName.toLowerCase();
             const { localName } = this;
             // Find the highest node with the same custom element registry
-            const highestCERNode = getHighestCERNode(this);
+            const highestCERNode = getRootRegistryContainer(this);
             if (!highestCERNode) {
                 return;
             }
@@ -70,7 +70,7 @@ export function MOSE(Base) {
                 return;
             }
             // Step 3: Find the highestCERNode of the parent
-            const parentHighestCERNode = getHighestCERNode(parentNode);
+            const parentHighestCERNode = getRootRegistryContainer(parentNode);
             // Find parent custom element with same localName
             if (!parentHighestCERNode || !('querySelector' in parentHighestCERNode)) {
                 return;
@@ -117,7 +117,7 @@ export function MOSE(Base) {
         }
         async #setupMountObserver() {
             // Find the highest node with the same custom element registry
-            const highestCERNode = getHighestCERNode(this);
+            const highestCERNode = getRootRegistryContainer(this);
             if (!highestCERNode) {
                 return;
             }
@@ -135,7 +135,7 @@ export function MOSE(Base) {
             }
             // Set up MountObserver to watch for <script type="mountobserver"> elements
             this.#mountObserver = new MountObserver({
-                whereElementMatches: 'script[type="mountobserver"]',
+                matching: 'script[type="mountobserver"]',
                 do: async (scriptElement) => {
                     await this.#processScriptElement(scriptElement, highestCERNode);
                 }
