@@ -28,8 +28,8 @@ export function MOSE(Base) {
             // const tagName = this.tagName.toLowerCase();
             const { localName } = this;
             // Find the highest node with the same custom element registry
-            const highestCERNode = getRootRegistryContainer(this);
-            if (!highestCERNode) {
+            const rootRegContainer = getRootRegistryContainer(this);
+            if (!rootRegContainer) {
                 return;
             }
             // Get the custom element registry for this scope
@@ -38,7 +38,7 @@ export function MOSE(Base) {
             // const targetRegistry = registry || customElements;
             // Check if an element with this name is already defined in this registry
             try {
-                const existingTags = Array.from(highestCERNode.querySelectorAll(localName)).filter(x => x !== this);
+                const existingTags = Array.from(rootRegContainer.querySelectorAll(localName)).filter(x => x !== this);
                 if (existingTags.length > 0) {
                     throw new Error(`Custom element "${localName}" is already defined in this custom element registry scope.`);
                 }
@@ -51,7 +51,7 @@ export function MOSE(Base) {
                 }
             }
             // Copy mountobserver script elements from container
-            this.#getContainerMOSEs(highestCERNode);
+            this.#getContainerMOSEs(rootRegContainer);
         }
         #getContainerMOSEs(highestCERNode) {
             // Step 1: Don't do anything if highestCERNode is the document root
