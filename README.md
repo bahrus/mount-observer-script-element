@@ -1,16 +1,17 @@
 # mount-observer-script-element
 
-This package provides a TypeScript mixin (MOSE) that enables declarative configuration of [MountObserver](https://www.npmjs.com/package/mount-observer) instances through `<script type="mountobserver">` elements, with support for Chrome's Scoped Custom Element Registries.
+This package provides a TypeScript mixin (MOSE) that enables inherited, declarative configuration of [MountObserver](https://www.npmjs.com/package/mount-observer) instances through `<script type="mountobserver">` elements.  Inheritance is applied via Scoped Custom Element Registry hierarchies (tested with Chrome 146+).  Safari/WebKit in theory supports this also, but for some reason is not yet supported by Playwright on windows.
 
 ## Overview
 
 The MOSE (Mount Observer Script Element) mixin provides:
 
 1. **Scoped Custom Element Registry Support**: Works with Chrome's scoped custom element registries
-2. **Declarative MountObserver Configuration**: Configure MountObserver instances using JSON in script elements
-3. **Script Inheritance**: Child custom elements automatically inherit mountobserver scripts from parent elements
-4. **Duplicate Prevention**: Ensures only one MountObserver is created per registry scope
-5. **Event Propagation**: Re-dispatches mount events from child elements
+2. **Declarative MountObserver Configuration**: Configure MountObserver instances using JSON in script elements or external references via JSON Module Imports.
+3. **Script Inheritance**: Child custom elements automatically inherit mountobserver scripts from parent scoped custom element registries.
+4. **Stray or Standalone MOSE support**.  Supports standalone script elements with type=mountobserver not contained inside a MOSE custom element.  
+5. **Duplicate Prevention**: Ensures only one MountObserver is created per registry scope
+6. **Event Propagation**: Re-dispatches mount events from child elements
 
 ## Installation
 
@@ -52,7 +53,7 @@ customElements.define('my-element', MyElement);
 
 ### 1. Declarative MountObserver Configuration
 
-Place `<script type="mountobserver">` elements inside your custom element to configure MountObserver behavior:
+Place `<script type="mountobserver">` elements inside your custom element to configure proper scoped custom element registry inheritance and activating mountobserver script elements (MOSEs):
 
 ```html
 <my-element>
@@ -94,24 +95,27 @@ You can combine external and inline configurations. The inline JSON will be merg
 
 ### 4. Script Inheritance
 
-Child custom elements automatically inherit mountobserver scripts from parent elements of the same type:
+Child custom elements automatically inherit mountobserver scripts from parent Custom Element Registry scopes:
 
 ```html
+<!-- outer custom element scope -->
 <my-element>
     <script type="mountobserver" src="./shared-config.json"></script>
     
+    ...
+    <!-- innner custom element scope -->
     <my-element>
-        <!-- This child element automatically inherits the parent's script -->
+        <!-- This child element automatically inherits the outer registry MOSEs -->
         <button>I inherit the configuration</button>
     </my-element>
 </my-element>
 ```
 
 **How it works:**
-- When a MOSE element is created, it searches for a parent element with the same `localName`
+- When a MOSE element is created, it searches for a containing scope element with the same `localName`
 - It clones all `<script type="mountobserver">` elements from the parent
 - Scripts with duplicate `src` attributes are not cloned (avoiding duplicates)
-- The child element listens for mount events on the parent to inherit dynamically added scripts
+- The child element listens for mount events on the containing scope element to inherit dynamically added scripts
 
 ### 5. Excluding Inherited Scripts
 
