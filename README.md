@@ -201,6 +201,64 @@ MOSE also processes "stray" mountobserver script elements that are not direct ch
 
 This feature enables more flexible placement of configuration scripts throughout your component tree.
 
+### 10. Accessing MountObserver Instances
+
+MOSE provides three ways to access the MountObserver instances created from script elements:
+
+#### A. Direct Access via Map
+
+```typescript
+class MyElement extends MOSE(HTMLElement) {
+    someMethod() {
+        // Access all observers
+        for (const [script, observer] of this.mountObservers) {
+            console.log('Script:', script);
+            console.log('Observer:', observer);
+        }
+    }
+}
+```
+
+#### B. Lifecycle Callback Method
+
+```typescript
+class MyElement extends MOSE(HTMLElement) {
+    // Override this method to receive notifications
+    protected onMountObserverCreated(
+        scriptElement: HTMLScriptElement, 
+        observer: MountObserver, 
+        rootNode: Node
+    ) {
+        console.log('Observer created for script:', scriptElement);
+        
+        // Add custom event listeners
+        observer.addEventListener('mount', (e) => {
+            console.log('Element mounted:', e.mountedElement);
+        });
+    }
+}
+```
+
+#### C. Custom Events
+
+```typescript
+class MyElement extends MOSE(HTMLElement) {
+    constructor() {
+        super();
+        
+        this.addEventListener('mose:observer-created', (e: CustomEvent) => {
+            const { scriptElement, observer, rootNode } = e.detail;
+            console.log('Observer created:', observer);
+        });
+    }
+}
+```
+
+**When to use each approach:**
+- **Map**: When you need to query all observers at once
+- **Callback**: When subclassing and want type-safe notifications
+- **Events**: When listening from external code or need loose coupling
+
 ## API
 
 ### MOSE Mixin

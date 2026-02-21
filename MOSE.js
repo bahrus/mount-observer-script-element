@@ -18,6 +18,10 @@ const MOUNT_OBSERVER_SETUP = Symbol.for('cteH9dMG-UWwxVaMwFgvQA');
 export function MOSE(Base) {
     return class extends Base {
         #mountObserver;
+        /**
+         * Public map of script elements to their created MountObserver instances
+         */
+        mountObservers = new Map();
         constructor(...args) {
             super(...args);
             this.#checkForDuplicateRegistration();
@@ -197,6 +201,16 @@ export function MOSE(Base) {
                 try {
                     const observer = new MountObserver(config);
                     observer.observe(rootNode);
+                    // Store in map for direct access
+                    this.mountObservers.set(scriptElement, observer);
+                    // Call lifecycle method if defined
+                    this.onMountObserverCreated?.(scriptElement, observer, rootNode);
+                    // Dispatch custom event
+                    this.dispatchEvent(new CustomEvent('mose:observer-created', {
+                        detail: { scriptElement, observer, rootNode },
+                        bubbles: true,
+                        composed: true
+                    }));
                 }
                 catch (error) {
                     console.error('Failed to create MountObserver with config:', error);
