@@ -226,8 +226,8 @@ A TypeScript mixin that adds MountObserver script element functionality to any H
    - Creates a MountObserver with the merged configuration
 
 3. **Registry Scoping**: 
-   - Uses `getHighestCERNode()` to find the appropriate scope
-   - Ensures only one MountObserver per highestCERNode
+   - Uses `mountObserver/getRootRegistryContainr.js` to find the appropriate scope
+   - Ensures only one MOSE element with that name per rootRegistryNode.
    - Stores observer reference using `Symbol.for('cteH9dMG-UWwxVaMwFgvQA')`
 
 ## Example: Complete Setup
