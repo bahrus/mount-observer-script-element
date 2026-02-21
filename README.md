@@ -81,7 +81,7 @@ The JSON file will be loaded using JSON import with `import(src, {with: {type: '
 
 ### 3. Merging Configurations
 
-You can combine external and inline configurations. The inline JSON will be merged with the external configuration using [assign-gingerly](https://www.npmjs.com/package/assign-gingerly):
+We can combine external and inline configurations. The inline JSON will be merged with the external configuration using [assign-gingerly](https://www.npmjs.com/package/assign-gingerly):
 
 ```html
 <script type="mountobserver" src="./base-config.json">
@@ -103,7 +103,7 @@ Child custom elements automatically inherit mountobserver scripts from parent Cu
     <script type="mountobserver" src="./shared-config.json"></script>
     
     ...
-    <!-- innner custom element scope -->
+    <!-- inner custom element scope -->
     <my-element>
         <!-- This child element automatically inherits the outer registry MOSEs -->
         <button>I inherit the configuration</button>
@@ -211,13 +211,6 @@ function MOSE<T extends Constructor<HTMLElement>>(Base: T): T
 
 A TypeScript mixin that adds MountObserver script element functionality to any HTMLElement class.
 
-### getHighestCERNode
-
-```typescript
-function getHighestCERNode(node: Node): Node | null
-```
-
-Utility function that finds the highest node in the DOM tree that shares the same `customElementRegistry` as the provided node.
 
 ## How It Works
 
