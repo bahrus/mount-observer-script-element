@@ -30,12 +30,12 @@
     }
   },
   "dependencies": {
-    "mount-observer": "0.1.7",
-    "assign-gingerly": "0.0.13"
+    "mount-observer": "0.1.9",
+    "assign-gingerly": "0.0.14"
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",
-    "spa-ssi": "0.0.26"
+    "spa-ssi": "0.0.27"
   },
   "scripts": {
     "serve": "node ./node_modules/spa-ssi/serve.js",
