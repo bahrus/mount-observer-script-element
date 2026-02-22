@@ -30,7 +30,7 @@
     }
   },
   "dependencies": {
-    "mount-observer": "0.1.9",
+    "mount-observer": "0.1.10",
     "assign-gingerly": "0.0.14"
   },
   "devDependencies": {
