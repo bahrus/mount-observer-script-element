@@ -49,11 +49,15 @@ customElements.define('my-element', MyElement);
 </my-element>
 ```
 
+## Specifications [TODO]
+
+1.  `<script type="mountobserver">` elements whose parent element name matches that of a custom element don't become activated from externally.  This package proposal polyfill does provide a mixin that framework authors can use to define a 
+
 ## Features
 
 ### 1. Declarative MountObserver Configuration
 
-Place `<script type="mountobserver">` elements inside your custom element to configure proper scoped custom element registry inheritance and activating mountobserver script elements (MOSEs):
+Place `<script type="mountobserver">` elements inside your custom element that  to configure proper scoped custom element registry inheritance and activating mountobserver script elements (MOSEs):
 
 ```html
 <my-element>
