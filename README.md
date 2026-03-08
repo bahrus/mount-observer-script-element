@@ -21,7 +21,8 @@ npm install mount-observer-script-element
 
 ## Basic Usage
 
-```typescript
+```TypeScript
+
 import { MOSE } from 'mount-observer-script-element/MOSE.js';
 
 class MyElement extends MOSE(HTMLElement) {
@@ -35,7 +36,7 @@ customElements.define('my-element', MyElement);
 
 ```html
 <my-element>
-    <script type="mountobserver">
+    <script type="json">
     {
         "matching": "button",
         "assignOnMount": {
