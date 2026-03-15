@@ -1,6 +1,6 @@
 import { getRegistryRoot } from 'mount-observer/getRegistryRoot.js';
-import { MountObserver } from 'mount-observer/MountObserver.js';
 import { mountEventName } from 'mount-observer/Events.js';
+import 'mount-observer/ElementMountExtension.js';
 /**
  * Symbol to track if MountObserver has been set up for an element
  */
@@ -25,7 +25,10 @@ export function MOSE(Base) {
         constructor(...args) {
             super(...args);
             this.#checkForDuplicateRegistration();
-            this.#setupMountObserver();
+            document.mountGlobally({
+                do: 'builtIns.mountObserverScript'
+            });
+            //this.#setupMountObserver();
         }
         #checkForDuplicateRegistration() {
             // Get the tag name of this element
@@ -116,104 +119,6 @@ export function MOSE(Base) {
                 if (!alreadyExists) {
                     const clonedScript = script.cloneNode(true);
                     this.appendChild(clonedScript);
-                }
-            }
-        }
-        async #setupMountObserver() {
-            // Find the highest node with the same custom element registry
-            const highestCERNode = getRegistryRoot(this);
-            if (!highestCERNode) {
-                return;
-            }
-            // Check if MountObserver has already been set up for this element
-            const existingObserver = highestCERNode[MOUNT_OBSERVER_SETUP];
-            if (existingObserver) {
-                // Subscribe to the existing observer's mount event and re-dispatch from this element
-                existingObserver.addEventListener(mountEventName, (e) => {
-                    const { mountedElement } = e;
-                    const mountedScriptElement = mountedElement;
-                    // Skip if already processed
-                    if (mountedScriptElement.dataset?.moseProcessed)
-                        return;
-                    mountedScriptElement.dataset.moseProcessed = 'true';
-                    if (this.contains(mountedElement)) {
-                        this.dispatchEvent(e);
-                    }
-                    else {
-                        // Handle stray script elements
-                        const { parentElement } = mountedScriptElement;
-                        if (parentElement === null)
-                            return;
-                        const { localName } = parentElement;
-                        if (!localName.includes('-'))
-                            return;
-                        const highestCERNode = getRegistryRoot(parentElement);
-                        if (!highestCERNode)
-                            return;
-                        this.#processScriptElement(mountedScriptElement, highestCERNode);
-                    }
-                });
-                return;
-            }
-            // Set up MountObserver to watch for <script type="mountobserver"> elements
-            this.#mountObserver = new MountObserver({
-                matching: 'script[type="mountobserver"]',
-                do: async (scriptElement) => {
-                    await this.#processScriptElement(scriptElement, highestCERNode);
-                }
-            });
-            // Mark that we've set up the MountObserver for this element
-            highestCERNode[MOUNT_OBSERVER_SETUP] = this.#mountObserver;
-            await this.#mountObserver.observe(highestCERNode);
-        }
-        async #processScriptElement(scriptElement, rootNode) {
-            let config = {};
-            // Step 1: Check if script has src attribute and load JSON
-            const src = scriptElement.getAttribute('src');
-            if (src) {
-                try {
-                    const response = await import(src, { with: { type: 'json' } });
-                    config = structuredClone(response.default);
-                }
-                catch (error) {
-                    console.error(`Failed to load JSON from ${scriptElement.src}:`, error);
-                    return;
-                }
-            }
-            // Step 2: If innerHTML is non-trivial, parse and merge it
-            const innerHTML = scriptElement.innerHTML.trim();
-            if (innerHTML) {
-                try {
-                    const parsedJSON = JSON.parse(innerHTML);
-                    // Step 3: Import assignGingerly and merge
-                    const { assignGingerly } = await import('assign-gingerly/assignGingerly.js');
-                    config = assignGingerly(config, parsedJSON, {
-                        registry: scriptElement.customElementRegistry.assignGingerlyRegistry
-                    });
-                }
-                catch (error) {
-                    console.error('Failed to parse script innerHTML as JSON:', error);
-                    return;
-                }
-            }
-            // Step 4: Apply MountObserver with the merged config
-            if (Object.keys(config).length > 0) {
-                try {
-                    const observer = new MountObserver(config);
-                    observer.observe(rootNode);
-                    // Store in map for direct access
-                    this.mountObservers.set(scriptElement, observer);
-                    // Call lifecycle method if defined
-                    this.onMountObserverCreated?.(scriptElement, observer, rootNode);
-                    // Dispatch custom event
-                    this.dispatchEvent(new CustomEvent('mose:observer-created', {
-                        detail: { scriptElement, observer, rootNode },
-                        bubbles: true,
-                        composed: true
-                    }));
-                }
-                catch (error) {
-                    console.error('Failed to create MountObserver with config:', error);
                 }
             }
         }
