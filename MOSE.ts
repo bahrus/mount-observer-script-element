@@ -1,4 +1,4 @@
-import { getRootRegistryContainer } from 'mount-observer/getRootRegistryContainer.js';
+import { getRegistryRoot } from 'mount-observer/getRegistryRoot.js';
 import { MountObserver } from 'mount-observer/MountObserver.js';
 import { MountEvent, mountEventName } from 'mount-observer/Events.js'
 
@@ -53,7 +53,7 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
             const {localName} = this;
 
             // Find the highest node with the same custom element registry
-            const rootRegContainer = getRootRegistryContainer(this) as DocumentFragment;
+            const rootRegContainer = getRegistryRoot(this) as DocumentFragment;
 
             if (!rootRegContainer) {
                 return;
@@ -105,7 +105,7 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
             }
 
             // Step 3: Find the highestCERNode of the parent
-            const parentHighestCERNode = getRootRegistryContainer(parentNode);
+            const parentHighestCERNode = getRegistryRoot(parentNode);
 
             // Find parent custom element with same localName
             if (!parentHighestCERNode || !('querySelector' in parentHighestCERNode)) {
@@ -164,7 +164,7 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
 
         async #setupMountObserver() {
             // Find the highest node with the same custom element registry
-            const highestCERNode = getRootRegistryContainer(this);
+            const highestCERNode = getRegistryRoot(this);
 
             if (!highestCERNode) {
                 return;
@@ -192,7 +192,7 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
                         const {localName} = parentElement;
                         if(!localName.includes('-')) return;
                         
-                        const highestCERNode = getRootRegistryContainer(parentElement);
+                        const highestCERNode = getRegistryRoot(parentElement);
                         if(!highestCERNode) return;
                         
                         this.#processScriptElement(mountedScriptElement, highestCERNode);

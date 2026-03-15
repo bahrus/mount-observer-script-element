@@ -4,20 +4,14 @@ This package provides a TypeScript mixin (MOSE) that enables inherited, declarat
 
 ## Overview
 
-The MOSE (Mount Observer Script Element) mixin provides:
+The MOSE (Mount Observer Script Element):
 
-1. **Scoped Custom Element Registry Support**: Works with Chrome's scoped custom element registries
-2. **Declarative MountObserver Configuration**: Configure MountObserver instances using JSON in script elements or external references via JSON Module Imports.
-3. **Script Inheritance**: Child custom elements automatically inherit mountobserver scripts from parent scoped custom element registries.
-4. **Stray or Standalone MOSE support**.  Supports standalone script elements with type=mountobserver not contained inside a MOSE custom element.  
-5. **Duplicate Prevention**: Ensures only one MountObserver is created per registry scope
-6. **Event Propagation**: Re-dispatches mount events from child elements
-
-## Installation
-
-```bash
-npm install mount-observer-script-element
-```
+1. Causes some much needed global browser enhancements to get applied globally, namely:
+    1.  [Makes declarative script elements able to export modules](https://github.com/bahrus/mount-observer?tab=readme-ov-file#exposing-module-exports-from-script-elements)
+    2.  Bootstraps support for [mountobserver script elements ](https://github.com/bahrus/mount-observer?tab=readme-ov-file#exposing-module-exports-from-script-elements)
+    3.  Optimizes repeated use of templates by [hoisting them to the document root](https://github.com/bahrus/mount-observer?tab=readme-ov-file#hoisting-templates-for-performance).
+    4.  Enables [intra document HTML Includes](https://github.com/bahrus/mount-observer?tab=readme-ov-file#intra-document-html-includes-with-htmlinclude) with support for dynamic weaving of dynamic content.
+2.  Syncs up mountobserver script elements from the parent ShadowRoot, while enabling the ability to exclude / include groups of mountobservers that are applicable to the ShadowRoot 
 
 ## Basic Usage
 
@@ -25,28 +19,62 @@ npm install mount-observer-script-element
 
 import { MOSE } from 'mount-observer-script-element/MOSE.js';
 
-class MyElement extends MOSE(HTMLElement) {
+class BeHive extends MOSE(HTMLElement) {
     constructor() {
         super();
     }
 }
 
-customElements.define('my-element', MyElement);
+customElements.define('be-hive', BeHive);
 ```
 
 ```html
+<be-hive include="beABeacon beCounted">
+    <b></b>
+</be-hive>
+```
+
+Typically, in practice, there will not be such an attribute (include-ids), but it is an option that the MOSE mixin supports.  The property of the mixin, includeIds, corresponds to this attribute
+
+What this does:
+
+If the element has no light children with matching id's, it births light children matching the included ids, after discovering the 
+
+```html
+<be-hive>
+    <b></b>
+    <template src="#be-hive.beABeacon"></template>
+    <template src="#be-hive.beCounted"></template>
+</be-hive>
+```
+
+It might insert more (see below for why):
+
+
+
+For all existing mount-observer script element children that my-element finds, which lack id's, it adds (numbered) id's:
+
+```html
 <my-element>
-    <script type="json">
-    {
-        "matching": "button",
-        "assignOnMount": {
-            "disabled": false,
-            "?.dataset?.action": "submit",
-            "?.style?.color": "green"
-        }
-    }
-    </script>
-    <button>Click me</button>
+    <script type=mountobserver>{
+        "whenDefined": "my-element",
+        ...
+    }</script>
+    <script type=mountobserver src="myConfig.json"></script>
+    <script type=mountobserver id=your-config src="myConfig.json"></script>
+</my-element>
+```
+
+becomes:
+
+```html
+<my-element>
+    <script id=my-element-src-0 type=mountobserver>{
+        "whenDefined": "my-element",
+        ...
+    }</script>
+    <script id=my-element-src-1 type=mountobserver src="myConfig.json"></script>
+    <script type=mountobserver id=your-config src="myConfig.json"></script>
 </my-element>
 ```
 
@@ -84,7 +112,7 @@ Load configuration from external JSON files:
 
 The JSON file will be loaded using JSON import with `import(src, {with: {type: 'json'}})`.
 
-### 3. Merging Configurations
+### 3. Merging Configurations 
 
 We can combine external and inline configurations. The inline JSON will be merged with the external configuration using [assign-gingerly](https://www.npmjs.com/package/assign-gingerly):
 
