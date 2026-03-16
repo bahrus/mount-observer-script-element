@@ -2,6 +2,14 @@ import { getRegistryRoot } from 'mount-observer/getRegistryRoot.js';
 import { MountObserver } from 'mount-observer/MountObserver.js';
 import { MountEvent, mountEventName } from 'mount-observer/Events.js';
 import 'mount-observer/ElementMountExtension.js';
+import 'mount-observer/handlers/MountObserverScript.js';
+import {mos} from 'mount-observer/handlers/MountObserverScript.js';
+import 'mount-observer/handlers/ScriptExport.js';
+import {scriptExport} from 'mount-observer/handlers/ScriptExport.js';
+import 'mount-observer/handlers/HTMLInclude.js';
+import {include} from 'mount-observer/handlers/HTMLInclude.js';
+import 'mount-observer/handlers/HoistTemplate.js';
+import {hoist} from 'mount-observer/handlers/HoistTemplate.js';
 
 /**
  * Type for a constructor that can be extended
@@ -46,9 +54,17 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
             super(...args);
             this.#checkForDuplicateRegistration();
             document.mountGlobally({
-                do: 'builtIns.mountObserverScript'
+                do: mos
             });
-            //this.#setupMountObserver();
+            document.mountGlobally({
+                do: scriptExport
+            });
+            document.mountGlobally({
+                do: include
+            });
+            document.mountGlobally({
+                do: hoist
+            });
         }
 
         #checkForDuplicateRegistration() {
