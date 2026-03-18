@@ -10,6 +10,8 @@ import 'mount-observer/handlers/HTMLInclude.js';
 import {include} from 'mount-observer/handlers/HTMLInclude.js';
 import 'mount-observer/handlers/HoistTemplate.js';
 import {hoist} from 'mount-observer/handlers/HoistTemplate.js';
+import {emc} from 'mount-observer/handlers/EMCScript.js';
+import 'mount-observer/handlers/EMCScript.js';
 
 /**
  * Type for a constructor that can be extended
@@ -64,6 +66,9 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
             });
             document.mountGlobally({
                 do: hoist
+            });
+            document.mountGlobally({
+                do: emc
             });
         }
 

@@ -9,6 +9,8 @@ import 'mount-observer/handlers/HTMLInclude.js';
 import { include } from 'mount-observer/handlers/HTMLInclude.js';
 import 'mount-observer/handlers/HoistTemplate.js';
 import { hoist } from 'mount-observer/handlers/HoistTemplate.js';
+import { emc } from 'mount-observer/handlers/EMCScript.js';
+import 'mount-observer/handlers/EMCScript.js';
 /**
  * Symbol to track if MountObserver has been set up for an element
  */
@@ -44,6 +46,9 @@ export function MOSE(Base) {
             });
             document.mountGlobally({
                 do: hoist
+            });
+            document.mountGlobally({
+                do: emc
             });
         }
         #checkForDuplicateRegistration() {
