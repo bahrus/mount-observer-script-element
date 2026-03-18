@@ -153,38 +153,50 @@ export function MOSE<T extends Constructor<HTMLElement>>(Base: T) {
             // Add event listener for future mount events
             parentCE.addEventListener(mountEventName, (e: Event) => {
                 const mountedElement = (e as MountEvent).mountedElement;
-                if (mountedElement instanceof HTMLScriptElement && mountedElement.type === 'mountobserver') {
-                    this.#cloneAndAppendScripts(parentCE);
-                }
+                if (mountedElement instanceof HTMLScriptElement){
+                    const {type} = mountedElement;
+                    switch(type){
+                        case 'mountobserver':
+                        case 'emc':
+                            this.#cloneAndAppendScripts(parentCE);
+                    }
+                } 
             });
         }
 
         #cloneAndAppendScripts(sourceElement: Element) {
-            const scripts = Array.from(sourceElement.querySelectorAll('script[type="mountobserver"]')) as HTMLScriptElement[];
-            
-            // Get exclude value from property or attribute
-            const exclude = (this as any).exclude ?? this.getAttribute('exclude');
-            
-            for (const script of scripts) {
-                // Check if script matches exclude criteria
-                if (exclude && script.matches(exclude)) {
-                    continue;
-                }
+            //TODO: do we need this?
+            const types = ['mountobserver', 'emc'];
+            for(const t of types){
+                //[TODO]: get rid of this method
+                const qry = `script[type="${t}"]`;
+                const scripts = Array.from(sourceElement.querySelectorAll(qry)) as HTMLScriptElement[];
                 
-                const src = script.getAttribute('src');
+                // Get exclude value from property or attribute
+                const exclude = (this as any).exclude ?? this.getAttribute('exclude');
                 
-                // Check if we already have a script with the same src
-                const existingScripts = Array.from(this.querySelectorAll('script[type="mountobserver"]')) as HTMLScriptElement[];
-                const alreadyExists = existingScripts.some(existing => {
-                    const existingSrc = existing.getAttribute('src');
-                    return existingSrc === src;
-                });
+                for (const script of scripts) {
+                    // Check if script matches exclude criteria
+                    if (exclude && script.matches(exclude)) {
+                        continue;
+                    }
+                    
+                    const src = script.getAttribute('src');
+                    
+                    // Check if we already have a script with the same src
+                    const existingScripts = Array.from(this.querySelectorAll(qry)) as HTMLScriptElement[];
+                    const alreadyExists = existingScripts.some(existing => {
+                        const existingSrc = existing.getAttribute('src');
+                        return existingSrc === src;
+                    });
 
-                if (!alreadyExists) {
-                    const clonedScript = script.cloneNode(true) as HTMLScriptElement;
-                    this.appendChild(clonedScript);
+                    if (!alreadyExists) {
+                        const clonedScript = script.cloneNode(true) as HTMLScriptElement;
+                        this.appendChild(clonedScript);
+                    }
                 }
             }
+
         }
 
 
